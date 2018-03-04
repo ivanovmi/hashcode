@@ -102,10 +102,6 @@ ENV/
 
 # HashCode stuff
 task.pdf
-a.in
-b.in
-c.in
-d.in
-e.in
+*.in
 *.out
-test.py
+test*
