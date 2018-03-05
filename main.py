@@ -2,10 +2,14 @@ import argparse
 
 
 class Vehicle(object):
-    def __init__(self):
+    def __init__(self, car_num):
+        self.num = car_num
         self.coordinates = [0, 0]
         self.assigned_rides = []
         self.traveled_distance = 0
+
+    def __repr__(self):
+        return "Number: {}".format(self.num)
 
     def set_traveled_distance(self, new_distance):
         self.traveled_distance += new_distance
@@ -15,14 +19,22 @@ class Vehicle(object):
 
 
 class Ride(object):
-    def __init__(self, *args):
+    def __init__(self, ride_num, *args):
+        self.num = ride_num
         self.start_point = args[:2]
         self.finish_point = args[2:4]
         self.earliest_start = args[4]
         self.latest_finish = args[5]
 
     def __repr__(self):
-        return "Start: {}, Finish: {}".format(self.start_point, self.finish_point)
+        return "Number: {}, " \
+               "Start: {}, " \
+               "Finish: {}, " \
+               "Earliest Start: {}, " \
+               "Latest Finish: {}".format(self.num, self.start_point,
+                                          self.finish_point,
+                                          self.earliest_start,
+                                          self.latest_finish)
 
 
 class Info(object):
@@ -36,7 +48,13 @@ class Info(object):
         self.steps = steps
 
     def __repr__(self):
-        return "Rows: {}, Columns: {}".format(self.rows, self.columns)
+        return "Rows: {}, " \
+               "Columns: {}, " \
+               "Number of vehicles: {}," \
+               "Number of rides: {}, " \
+               "Bonus: {}, " \
+               "Steps: {}".format(self.rows, self.columns, self.vehicles_num,
+                                  self.rides_num, self.bonus, self.steps)
 
 
 class Utils(object):
@@ -45,9 +63,11 @@ class Utils(object):
         with open(inp_file, 'r') as input_file:
             input_file_content = input_file.readlines()
             info = Info(*input_file_content[0].rstrip().split())
-            rides = [Ride(*ride.rstrip().split()) for ride in input_file_content[1:]]
-
-        return info, rides
+            rides = [Ride(input_file_content.index(ride) - 1,
+                          *ride.rstrip().split())
+                     for ride in input_file_content[1:]]
+            cars = Utils.init_cars(info.vehicles_num)
+        return info, cars, rides
 
     @staticmethod
     def generate_output():
@@ -58,9 +78,14 @@ class Utils(object):
         Utils.simulate()
 
     @staticmethod
+    def init_cars(vehicle_num):
+        return [Vehicle(vehicle_n)
+                for vehicle_n in range(1, int(vehicle_num)+1)]
+
+    @staticmethod
     def create_parser():
         parser = argparse.ArgumentParser()
-        parser.add_argument('--input', dest='input_file', default='a.in',
+        parser.add_argument('--input', dest='input_file',
                             required=True, help='Input dataset')
 
         return parser
@@ -70,8 +95,8 @@ def main():
     utils = Utils()
     parser = utils.create_parser()
     args = parser.parse_args()
-    info, rides = utils.parse_input(args.input_file)
-    print(info, rides)
+    info, cars, rides = utils.parse_input(args.input_file)
+    print(info, cars, rides)
 
 
 if __name__ == "__main__":
